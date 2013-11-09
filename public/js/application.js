@@ -80,7 +80,7 @@ function DocsManager() {
     this.compileAndRender = function(documentId, documentName) {
         // first try to save the current document being displayed
         $.ajax({type: "POST"
-                , data: {"documentId" : documentId}
+                , data: {"documentId" : documentId, "documentText": editor.getValue()}
                 , url: "/savedoc"
                 , success: function(response) {
                     // update alerts
@@ -410,38 +410,32 @@ function DocsManager() {
      * 
      */
     this.openDocOnLoad = function(onloadDoc) {
-        // open sharejs doc in session first
-        sharejs.open(onloadDoc.id, "text", function(error, doc) {
-            if (oldDoc) {
-                oldDoc.close();
-            }
-            currentDoc = doc; // store doc object               
-            
-            // compile and render document
-            // docs_manager.compileAndRender(onloadDoc.id, onloadDoc.name);
-            
-            var userDoc = onloadDoc
-            , writeAccess = userDoc.writeAccess == "true";
-            
-            // make editor writeable if user has write permission on document
-            if (writeAccess) {
-                editor.setReadOnly(false);
-            } else {
-                editor.setReadOnly(true);
-            }
-            
-            // update "last saved" info box
-            updateLastSavedInfo(jQuery.timeago(new Date(userDoc.lastSaved)));
-            
-            // load document text here
-            if (doc.created) {
-                doc.insert(0, userDoc.text);
-            }
-            
-            doc.attach_ace(editor);
-            
-            oldDoc = doc;       
-        });      
+        
+		//currentDoc = doc; // store doc object               
+		
+		// compile and render document
+		// docs_manager.compileAndRender(onloadDoc.id, onloadDoc.name);
+		
+		var userDoc = onloadDoc
+		, writeAccess = userDoc.writeAccess == "true";
+		
+		// make editor writeable if user has write permission on document
+		console.log(writeAccess);
+		if (writeAccess) {
+			editor.setReadOnly(false);
+		} else {
+			editor.setReadOnly(true);
+			$(".save-document-link").remove();
+		}
+		
+		// update "last saved" info box
+		updateLastSavedInfo(jQuery.timeago(new Date(userDoc.lastSaved)));
+		
+		// load document text here
+		editor.setValue(userDoc.text);
+		editor.clearSelection();
+		
+		//oldDoc = doc;             
     };
     
     
@@ -501,7 +495,7 @@ function DocsManager() {
     this.saveDoc = function(docId, docName) {
         // save the document
         $.ajax({type: "POST"
-                , data: {"documentId" : docId}
+                , data: {"documentId" : docId, "documentText":editor.getValue()}
                 , url: "/savedoc"
                 , success: function(response) {
                     // update alerts
