@@ -10,5 +10,7 @@
       ,"connect-mongo" : "0.4.x"
       , "ejs" : "0.8.x"
       , "fs-extra" : "0.x.x"
+	  , "gift" : "0.1.x"
+	  
   }
 }

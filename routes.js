@@ -14,6 +14,8 @@ var mongoose = require("mongoose")
 , path = require("path")
 , exec = require("child_process").exec
 , http = require("http")
+, git = require("gift")
+, gitTools = require("./git-tools")
 
 // flylatex directory
 , flylatexdir = __dirname;
@@ -1242,45 +1244,96 @@ exports.saveDocument = function(req, res) {
     var response = {code: 400, errors: [], infos: []}
     , documentId = req.body.documentId
     , documentText =req.body.documentText;
-
-	Document.findOne({_id:documentId}, function(err, doc){
-		var newLine
-		, mb = 1024 * 1024;
-		
-		if (err || !doc) {
-			response.errors.push("Error in finding document to save");
+	
+	// What happens after the file has been commited?
+	function reactToCommit(err, newDocumentText)
+	{
+		if(err)
+		{
+			console.log('Commit');
+			console.log(err);
+			response.errors.push("The commit failed");
 			res.json(response);
 			return;
 		}
-		
-		// check if documentText length > 15MB (MongoDB doc size limit is 16MB)
-		if (documentText.length > 15 * mb) {
-			response.errors.push("This document is 15MB or above. Too large to store.");
-			res.json(response);
-			return;
+		else
+		{
+			Document.findOne({_id:documentId}, function(err, doc){
+				var newLine
+				, mb = 1024 * 1024;
+				
+				if (err || !doc) {
+					response.errors.push("Error in finding document to save");
+					res.json(response);
+					return;
+				}
+				
+				// check if documentText length > 15MB (MongoDB doc size limit is 16MB)
+				if (newDocumentText.length > 15 * mb) {
+					response.errors.push("This document is 15MB or above. Too large to store.");
+					res.json(response);
+					return;
+				}
+				
+				doc.data = new Buffer(newDocumentText);
+				doc.lastModified = new Date();
+				
+				// save document text
+				doc.save(function(err) {
+					if (err) {
+						console.log("Error while trying to save this document");
+					}
+				});
+				
+				var savedDocMessage = {
+					"sharesWith" : openDocuments[documentId]
+					, "lastModified" : doc.lastModified
+				};
+				
+				// send a message to all users that are currently viewing the saved doc
+				io.sockets.volatile.emit("savedDocument", JSON.stringify(savedDocMessage)); 
+				
+				// after save
+				response.code = 200;
+				response.infos.push("Successfully saved the document");
+				res.json(response);
+			});
 		}
-		
-		doc.data = new Buffer(documentText);
-		doc.lastModified = new Date();
-		
-		// save document text
-		doc.save(function(err) {
-			if (err) {
-				console.log("Error while trying to save this document");
-			}
-		});
-		
-		var savedDocMessage = {
-			"sharesWith" : openDocuments[documentId]
-			, "lastModified" : doc.lastModified
-		};
-		
-		// send a message to all users that are currently viewing the saved doc
-		io.sockets.volatile.emit("savedDocument", JSON.stringify(savedDocMessage)); 
-		
-		// after save
-		response.code = 200;
-		response.infos.push("Successfully saved the document");
-		res.json(response);
-    });
+	}
+	
+	// Initialize Repository
+	git.init('/home/git/repo/'+documentId, function(err, repo)
+	{
+		// If directory/Repo does not exist yet
+		if(err && err.code === 'ENOENT')
+		{
+			// Create directory
+			fs.mkdir('/home/git/repo/'+documentId, function(err)
+			{
+				if(err)
+				{
+					console.log('Make Directory');
+					console.log(err);
+					response.errors.push("Could not create a directory for the repository");
+					res.json(response);
+					return;
+				}
+				else
+				{
+					// And create repository afterwards
+					git.init('/home/git/repo/'+documentId, function(err, repo)
+					{
+						// Commit the file
+						gitTools.commit(repo, documentId, documentText, reactToCommit);
+					});
+				}
+			});
+		}
+		else
+		{
+			// Commit the file
+			gitTools.commit(repo, documentId, documentText, reactToCommit);
+		}
+						
+	});				
 };
