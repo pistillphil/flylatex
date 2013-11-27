@@ -1,12 +1,29 @@
 FlyLatex
 ========
 
+About this Fork
+----------------
+
+This [fork](https://github.com/pistillphil/flylatex) aims to change a few aspects of the [original](https://github.com/alabid/flylatex) application:
+* The editor's real time capability will be removed.
+* A version control system based on git will be implemented.
+* Users will be able to check a file's history/restore documents.
+
+Information about the setup will be updated once this project is finished.
+
+Fork Status
+--------------
+This Application is currently **NOT** finished/working
+
+About FlyLatex
+---------------
+
 FlyLatex is a real-time collaborative environment for LaTeX built in nodejs.
 It includes a beautiful LaTeX ACE Editor and a PDF renderer. 
 
 FlyLatex gives you:
 
-* A Real Time Collaborative Code Editor
+* A ~~Real Time~~ Collaborative Code Editor
 
 * Real Time updates on status and privileges of Latex Documents
 
@@ -106,13 +123,21 @@ I'd really like your feedback, comments, and bug reports sent to me
 somehow preferably by filing an issue (github feature).
 
 
-Author
+Original Author
 ------
 Daniel Alabi
 
-Version
+Fork Author
+------
+pistillphil
+
+Original Version
 -------
 1.0
+
+Fork Version
+-------
+0.X (Unfinished)
 
 MIT Open Source License
 -----------------------
