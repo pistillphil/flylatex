@@ -1324,7 +1324,7 @@ exports.saveDocument = function(req, res) {
 					git.init('/home/git/repo/'+documentId, function(err, repo)
 					{
 						// Commit the file
-						gitTools.commit(repo, documentId, documentText, reactToCommit);
+						gitTools.commit(repo, req, reactToCommit);
 					});
 				}
 			});
@@ -1332,7 +1332,7 @@ exports.saveDocument = function(req, res) {
 		else
 		{
 			// Commit the file
-			gitTools.commit(repo, documentId, documentText, reactToCommit);
+			gitTools.commit(repo, req, reactToCommit);
 		}
 						
 	});				

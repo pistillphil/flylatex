@@ -1,7 +1,10 @@
 var fs = require("fs-extra");
 
-function commit(repo, docID, docText, callback)
+function commit(repo, request, callback)
 {
+	docID = request.body.documentId;
+	docText = request.body.documentText;
+	userID = request.session.currentUser;
 	// Create a file and fill it with the editor's contents
 	fs.writeFile('/home/git/repo/'+docID+'/contents.tex', docText, 'utf8', function(err)
 	{
@@ -30,7 +33,7 @@ function commit(repo, docID, docText, callback)
 							console.log("Status:");
 							console.log(status);
 							// Commit
-							repo.commit("Temporarymessage", function(err)	//The message must not containt any spaces
+							repo.commit("User:" + userID, function(err)	//The message must not containt any spaces
 							{
 								if(err)
 								{
