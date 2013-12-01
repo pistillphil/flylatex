@@ -1230,6 +1230,44 @@ exports.openDocument = function(req, res) {
                        , port : configs.port
                        , userDocuments: req.session.userDocuments
                      });
+					 
+		// Create/Initialize a repository on document load
+		gitTools.createRepo(req, function(err, repo)
+		{
+			if(err)
+			{
+				console.log(err);
+				return;
+			}
+			// Delete the branch if it already exists
+			else
+			{
+				gitTools.deleteBranch(repo, req, function(err)
+				{
+					if(err)
+					{
+						console.log(err);
+						return;
+					}
+					// Create the branch from the current "master"
+					else
+					{
+						gitTools.createBranch(repo, req, function(err)
+						{
+							if(err)
+							{
+								console.log(err);
+								return;
+							}
+							else
+							{
+								console.log("Branch has been created on document load");
+							}
+						});
+					}
+				});
+			}
+		});
     });
 };
 
@@ -1250,7 +1288,7 @@ exports.saveDocument = function(req, res) {
 	{
 		if(err)
 		{
-			console.log('Commit');
+			console.log('CommitError');
 			console.log(err);
 			response.errors.push("The commit failed");
 			res.json(response);
@@ -1258,6 +1296,7 @@ exports.saveDocument = function(req, res) {
 		}
 		else
 		{
+			console.log("The commit seems to be succesfull!");
 			Document.findOne({_id:documentId}, function(err, doc){
 				var newLine
 				, mb = 1024 * 1024;
@@ -1300,40 +1339,6 @@ exports.saveDocument = function(req, res) {
 			});
 		}
 	}
-	
-	// Initialize Repository
-	git.init('/home/git/repo/'+documentId, function(err, repo)
-	{
-		// If directory/Repo does not exist yet
-		if(err && err.code === 'ENOENT')
-		{
-			// Create directory
-			fs.mkdir('/home/git/repo/'+documentId, function(err)
-			{
-				if(err)
-				{
-					console.log('Make Directory');
-					console.log(err);
-					response.errors.push("Could not create a directory for the repository");
-					res.json(response);
-					return;
-				}
-				else
-				{
-					// And create repository afterwards
-					git.init('/home/git/repo/'+documentId, function(err, repo)
-					{
-						// Commit the file
-						gitTools.commit(repo, req, reactToCommit);
-					});
-				}
-			});
-		}
-		else
-		{
-			// Commit the file
-			gitTools.commit(repo, req, reactToCommit);
-		}
-						
-	});				
+
+	gitTools.commit(req, reactToCommit);
 };
