@@ -210,9 +210,10 @@ function commitToBranchAndMerge(request, callback)
 													repo.merge(userID, function(err)
 													{
 														// TODO: Implement View to resolve Mergeconflicts
+														// TODO: mergeConflict should only be true if there really is a merge Conflict
 														if(err)
 														{
-															callback({error: err, func: "merge()"}, null);
+															callback({error: err, func: "merge()", mergeConflict: true}, null);
 															return;
 														}
 														// Delete the user's branch

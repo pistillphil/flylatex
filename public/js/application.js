@@ -871,6 +871,20 @@ var updateAlerts = function(response) {
     }
     
     if (response.errors.length > 0) {
+		if(response.mergeConflict)
+		{
+			bootbox.dialog("There has been a merge conflict, that has to be resolved!",
+			{
+				"header": "Merge Conflict!",
+				"label": "Reserve Merge Conflict",
+				"class": "btn-danger",
+				"callback": function()
+				{
+					documentIDIndex = window.location.href.lastIndexOf("/");
+					window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
+				}
+			});
+		}
         clearAjaxAlertBlocks();
         updateAjaxErrors(response.errors);
         return;

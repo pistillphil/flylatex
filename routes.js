@@ -1279,7 +1279,7 @@ exports.openDocument = function(req, res) {
  * @param res : response object
  */
 exports.saveDocument = function(req, res) {
-    var response = {code: 400, errors: [], infos: [], refresh: false}
+    var response = {code: 400, errors: [], infos: [], refresh: false, mergeConflict: false}
     , documentId = req.body.documentId
     , documentText =req.body.documentText;
 	
@@ -1291,6 +1291,10 @@ exports.saveDocument = function(req, res) {
 			console.log('CommitError');
 			console.log(err);
 			response.errors.push("The commit failed");
+			if(err.mergeConflict)
+			{
+				response.mergeConflict = true;
+			}
 			res.json(response);
 			return;
 		}
