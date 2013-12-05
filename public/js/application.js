@@ -866,7 +866,7 @@ var updateAjaxInfos = function(infos) {
  */
 var updateAlerts = function(response) {
     // nothing to display
-    if (!response.errors && !response.infos) {
+    if (!response.errors && !response.infos && !response.refresh) {
         return;
     }
     
@@ -877,7 +877,11 @@ var updateAlerts = function(response) {
     } else if (response.infos.length > 0) {
         clearAjaxAlertBlocks();
         updateAjaxInfos(response.infos);
-    }   
+    }
+	if(response.refresh)
+	{
+		window.setTimeout(function(){location.reload()}, 1000);
+	}
 }
 
 // ================ Handle bars helper functions ==========

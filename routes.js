@@ -1279,7 +1279,7 @@ exports.openDocument = function(req, res) {
  * @param res : response object
  */
 exports.saveDocument = function(req, res) {
-    var response = {code: 400, errors: [], infos: []}
+    var response = {code: 400, errors: [], infos: [], refresh: false}
     , documentId = req.body.documentId
     , documentText =req.body.documentText;
 	
@@ -1335,6 +1335,7 @@ exports.saveDocument = function(req, res) {
 				// after save
 				response.code = 200;
 				response.infos.push("Successfully saved the document");
+				response.refresh = true;
 				res.json(response);
 			});
 		}
