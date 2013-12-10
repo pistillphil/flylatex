@@ -110,6 +110,11 @@ app.post('/compiledoc', routes.compileDoc);
 // for serving pdf's for documents with specific id's
 app.get('/servepdf/:documentId', routes.servePDF);
 
+// for resolving merge conflicts with specific IDs
+app.get('/merge/:documentId', routes.mergeConflict);
+
+// resolve the merge conflict and save new file
+app.post('/mergedoc', routes.resolveMergeConflict);
 
 /** end of ROUTES */
 

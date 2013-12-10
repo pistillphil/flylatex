@@ -259,8 +259,53 @@ function commitToBranchAndMerge(request, callback)
 	});
 	
 }
+function merge(req, callback)
+{
+	// Create a file and fill it with the editor's contents
+	fs.writeFile('/home/git/repo/'+docID+'/contents.tex', docText, 'utf8', function(err)
+	{
+		if(err)
+		{
+			callback({error: err, func: "fs.writeFile)"}, null);
+			return;
+		}
+		// Add file to repository
+		else
+		{
+			repo.add('/home/git/repo/'+docID+'/contents.tex', function(err, addedFile)
+			{
+				if(err)
+				{
+					callback({error: err, func: "repo.add()"}, null);
+					return;
+				}
+				else
+				{
+					repo.commit("ResolvedMergeConflict", function(err)	//The message must not containt any spaces
+					{
+						if(err)
+						{
+							callback({error: err, func: "commit()"}, null);
+							return;
+						}
+						else
+						{
+							// Read the "new" file and give it to the callback
+							fs.readFile('/home/git/repo/'+docID+'/contents.tex', 'utf8', function(err, data)
+							{
+								callback(null, data); 
+							});
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
 
 exports.createRepo = createRepo
 exports.createBranch = createBranch;
 exports.deleteBranch = deleteBranch;
 exports.commit = commitToBranchAndMerge;
+exports.merge = merge;

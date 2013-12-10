@@ -78,64 +78,49 @@ function DocsManager() {
      * @param id : id of document to compile and render
      */
     this.compileAndRender = function(documentId, documentName) {
-        // first try to save the current document being displayed
-        $.ajax({type: "POST"
-                , data: {"documentId" : documentId, "documentText": editor.getValue()}
-                , url: "/savedoc"
-                , success: function(response) {
-                    // update alerts
-                    updateAlerts(response);
-                    
-                    if (response.errors.length > 0) {
-                        return;
-                    }
-                    
-                    // if no errors encountered, 
-                    // then try to compile the document
-                    $.ajax({ type: "POST"
-                             , data: {"documentId": documentId
-                                      , "documentName" : documentName}
-                             , url: "/compiledoc"
-                             , success: function(response) {
-                                 // update alerts
-                                 updateAlerts(response);
-                                 
-                                 // update logs for most recent pdf compile
-                                 // if any errors found in the log, then display
-                                 // error in compile message to user
-                                 var isError = false;
-                                 
-                                 updateLogs(response.logs);
-                                 
-                                 if (response.errors.length > 0) {
-                                     isError = true;
-                                 }
-                                 
-                                 // PDFJS.disableWorker = true;
-                                 PDFJS.workerSrc = "/js/pdf.js";
-                                 if (!isError) {
-                                     data.docOptions = {
-                                         pdfDoc : null
-                                         , pageNum : 1 // start by rendering page 1
-                                         , scale : 1.0 // default scale of page
-                                         , canvas : document.getElementById("the-canvas")
-                                         , ctx : document.getElementById("the-canvas").getContext("2d")
-                                     };
-                                     
-                                     
-                                     // Asynchronously download PDF as an ArrayBuffer
-                                     PDFJS.getDocument("http://"+document.location.host+response.compiledDocURI)
-                                         .then(function(_pdfDoc){
-                                             data.docOptions.pdfDoc = _pdfDoc;
-                                             
-                                             renderPage(data.docOptions.pageNum);
-                                         });
-                                 }
-                             }
-                           });
-                }
-               });
-    };
+        // try to compile the document
+		$.ajax({ type: "POST"
+				 , data: {"documentId": documentId
+						  , "documentName" : documentName}
+				 , url: "/compiledoc"
+				 , success: function(response) {
+					 // update alerts
+					 updateAlerts(response);
+					 
+					 // update logs for most recent pdf compile
+					 // if any errors found in the log, then display
+					 // error in compile message to user
+					 var isError = false;
+					 
+					 updateLogs(response.logs);
+					 
+					 if (response.errors.length > 0) {
+						 isError = true;
+					 }
+					 
+					 // PDFJS.disableWorker = true;
+					 PDFJS.workerSrc = "/js/pdf.js";
+					 if (!isError) {
+						 data.docOptions = {
+							 pdfDoc : null
+							 , pageNum : 1 // start by rendering page 1
+							 , scale : 1.0 // default scale of page
+							 , canvas : document.getElementById("the-canvas")
+							 , ctx : document.getElementById("the-canvas").getContext("2d")
+						 };
+						 
+						 
+						 // Asynchronously download PDF as an ArrayBuffer
+						 PDFJS.getDocument("http://"+document.location.host+response.compiledDocURI)
+							 .then(function(_pdfDoc){
+								 data.docOptions.pdfDoc = _pdfDoc;
+								 
+								 renderPage(data.docOptions.pageNum);
+							 });
+					 }
+				 }
+			   });
+        }
     
     /**
      * updateLogs ->
@@ -589,6 +574,24 @@ function DocsManager() {
     this.closeCreateDocView = function() {
         $(domTargets.createDocBlock).hide();
     };
+	
+		this.resolveConflict = function(docId, docname)
+	{
+		// TODO: Write warning message
+		bootbox.confirm("WARNING: !", function()
+		{
+		// save the document in it's current form
+			$.ajax({type: "POST"
+				, data: {"documentId" : docId, "documentText":editor.getValue()}
+				, url: "/mergedoc"
+				, success: function(response) {
+					// update alerts
+					updateAlerts(response);
+				}
+			});
+		
+		});
+	};
 }
 
 function UserMessages() {    
@@ -866,7 +869,7 @@ var updateAjaxInfos = function(infos) {
  */
 var updateAlerts = function(response) {
     // nothing to display
-    if (!response.errors && !response.infos && !response.refresh) {
+    if (!response.errors && !response.infos && !response.refresh && !response.resolved) {
         return;
     }
     
@@ -876,7 +879,7 @@ var updateAlerts = function(response) {
 			bootbox.dialog("There has been a merge conflict, that has to be resolved!",
 			{
 				"header": "Merge Conflict!",
-				"label": "Reserve Merge Conflict",
+				"label": "Resolve Merge Conflict",
 				"class": "btn-danger",
 				"callback": function()
 				{
@@ -896,6 +899,12 @@ var updateAlerts = function(response) {
 	{
 		window.setTimeout(function(){location.reload()}, 1000);
 	}
+	else if(response.resolved)
+	{
+		documentIDIndex = window.location.href.lastIndexOf("/");
+		window.location.href = "../document" + window.location.href.substring(documentIDIndex);
+	}
+	
 }
 
 // ================ Handle bars helper functions ==========

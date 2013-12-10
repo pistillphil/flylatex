@@ -1347,3 +1347,149 @@ exports.saveDocument = function(req, res) {
 
 	gitTools.commit(req, reactToCommit);
 };
+
+exports.mergeConflict = function(req, res)
+{
+	fs.readFile('/home/git/repo/'+docID+'/contents.tex', 'utf8', function(err, data)
+	{
+		if(err)
+		{
+			console.log(err);
+		}
+		else
+		{
+	
+			// retrieve the document id from url
+			var documentId = req.params.documentId;
+			
+			// first retrieve the name of the document
+			Document.findOne({_id:documentId}, function(err, doc) {
+				if (err || !doc) {
+					req.flash("error", "An Error Occured while trying to open the document");
+					res.redirect('back');
+					return;
+				}
+				
+				// assemble the document lines
+				var lastModified
+				, userDoc
+				, docInSession
+				, writeable
+				, sharesWith;
+				
+				// retrieve the document from the current user session
+				docInSession = helpers.searchForDocsInSession(documentId, req.session); 
+				// handle lag in findOne callback execution
+				if (docInSession == null) {
+					return;
+				}
+				
+				sharesWith = (openDocuments[documentId] ?
+							  openDocuments[documentId] : []);
+				
+				if (openDocuments[documentId] 
+					&& openDocuments[documentId].indexOf(req.session.currentUser) == -1) {
+					openDocuments[documentId].push(req.session.currentUser);
+				}
+				
+				// then record that this document is now opened by the current user
+				if (!openDocuments[documentId]) {
+					openDocuments[documentId] = [req.session.currentUser];
+				}
+				
+				// construct a user document
+				userDoc = {
+					"id" : documentId
+					, "name" : doc.name
+					, "text" : escape(data) // escape special characters
+					, "lastSaved" : doc.lastModified
+					, "sharesWith" : sharesWith
+					, "readAccess" : docInSession.readAccess
+					, "writeAccess" : docInSession.writeAccess
+					, "canShare" : docInSession.canShare
+				};
+				
+				// render the document you just opened
+				res.render("resolve-merge-conflict"
+						   , { title: "Resolving Merge Conflict for '"+ doc.name + "'"
+							   , shortTitle: "Fly Latex"
+							   , tagLine: "Viewing the document '" + doc.name + "'"
+							   , fileSpecificStyle: "open-document.css"
+							   , fileSpecificScript: "open-document.js"
+							   , userDocument: userDoc
+							   , currentUser: req.session.currentUser
+							   , isLoggedIn: req.session.isLoggedIn
+							   , port : configs.port
+							   , userDocuments: req.session.userDocuments
+							 });
+			});
+		};
+	});
+};
+
+exports.resolveMergeConflict = function(req, res)
+{
+	var response = {code: 400, errors: [], infos: [], resolved: false}
+    , documentId = req.body.documentId
+    , documentText = req.body.documentText;
+	
+	// What happens after the file has been commited?
+	function reactToMerge(err, newDocumentText)
+	{
+		if(err)
+		{
+			console.log('CommitError');
+			console.log(err);
+			return;
+		}
+		else
+		{
+			console.log("The resolve seems to be succesfull!");
+			Document.findOne({_id:documentId}, function(err, doc){
+				var newLine
+				, mb = 1024 * 1024;
+				
+				if (err || !doc) {
+					response.errors.push("Error in finding document to save");
+					res.json(response);
+					return;
+				}
+				
+				// check if documentText length > 15MB (MongoDB doc size limit is 16MB)
+				if (newDocumentText.length > 15 * mb) {
+					response.errors.push("This document is 15MB or above. Too large to store.");
+					res.json(response);
+					return;
+				}
+				
+				doc.data = new Buffer(newDocumentText);
+				doc.lastModified = new Date();
+				
+				// save document text
+				doc.save(function(err) {
+					if (err) {
+						console.log("Error while trying to save this document");
+					}
+				});
+				
+				var savedDocMessage = {
+					"sharesWith" : openDocuments[documentId]
+					, "lastModified" : doc.lastModified
+				};
+				
+				// send a message to all users that are currently viewing the saved doc
+				io.sockets.volatile.emit("savedDocument", JSON.stringify(savedDocMessage)); 
+				
+				// after save
+				response.code = 200;
+				response.infos.push("Successfully resolved the merge conflict");
+				response.resolved = true;
+				res.json(response);
+			});
+		}
+	}
+	
+	repo = git('/home/git/repo/'+docID);
+	
+	gitTools.merge(req, reactToMerge);
+}

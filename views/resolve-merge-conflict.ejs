@@ -1,0 +1,69 @@
+<div class="row">
+  <div class="span6">
+    <div class="documents-section-errors">
+      <!-- put dynamic errors onhere -->
+      
+      <!-- it should like the errors on the other pages. Be consistent. -->
+    </div>
+    <div class="back-to-documents-listing">
+      <button class="btn btn-primary" onclick="document.location.href='/';">
+	<i class="icon-backward"></i>
+	Back to Documents Listing
+      </button>
+      <button class="btn btn-primary" onclick="docs_manager.showCompilerView($(this));">
+	Show PDF View
+      </button>
+    </div>
+    <div id="header">
+      <div id="htext">
+	Editing&nbsp;
+	<b class="current-doc" data-doc-id="<%= userDocument.id %>" id="docname"><%= userDocument.name %></b>
+	<b><a class="save-document-link" href="javascript:void(0);" onclick="docs_manager.resolveConflict('<%= userDocument.id %>', '<%= userDocument.name %>');">Resolve Conflict</a></b>
+	<small id="last-saved-time-parent" style="display:none;" class="pull-right">
+	  Last Saved <span id="last-saved-time"></span>
+	</small>  
+      </div>
+    </div>
+    <div id="doc-area">
+      <div id="editor">
+      </div>
+    </div>
+  </div>
+  <div class="compiler-view span6" style="display:none;float:right;">
+    <!-- button to compile and display pdf document -->
+    <button class="btn btn-primary" onclick="docs_manager.compileAndRender('<%= userDocument.id %>', '<%= userDocument.name %>');">
+      <i class="icon-film"></i>
+      Compile and Render
+    </button>
+    <% if (userDocument.canShare)  { %>
+    <button class="btn btn-primary pull-right" onclick="docs_manager.downloadPDFDoc('<%= userDocument.id %>', '<%= userDocument.name %>');">
+      <i class="icon-share"></i>
+      Download
+    </button>
+    <% } %>
+    <div class="pdf-render">
+      <button class="btn" id="prev" onclick="docs_manager.goPreviousPage();">
+	<i class="icon-arrow-left"></i>
+	Previous
+      </button>
+      <button class="btn" id="next" onclick="docs_manager.goNextPage();">
+	<i class="pull-right icon-arrow-right" style="margin-left:3px;"></i>
+	Next
+      </button>
+      <a href="javascript:void(0);" rel="clickover" data-placement="left" data-original-title="Compilation Logs" id="view-logs" title="View Logs" class="btn btn-primary pull-right">
+	<i class="icon-road"></i>
+	View Logs
+      </a>
+      <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+      <span>Scale: <input onkeyup="docs_manager.changeScale($(this).val());" class="input-mini" type="text" placeholder="Scale" value="1"></span
+      <div>
+	<div id="pdf-canvas">
+	<canvas id="the-canvas">
+	  No PDF
+	</canvas>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+
