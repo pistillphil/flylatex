@@ -259,8 +259,13 @@ function commitToBranchAndMerge(request, callback)
 	});
 	
 }
-function merge(req, callback)
+function merge(request, callback)
 {
+	docID = request.body.documentId;
+	docText = request.body.documentText;
+	userID = request.session.currentUser;
+	repo = git('/home/git/repo/'+docID);
+	
 	// Create a file and fill it with the editor's contents
 	fs.writeFile('/home/git/repo/'+docID+'/contents.tex', docText, 'utf8', function(err)
 	{
@@ -302,10 +307,33 @@ function merge(req, callback)
 		}
 	});
 }
+function manageLocks(docID, callback)
+{
+	for(i = 0; i < gitLocks.length; i++)
+	{
+		if(gitLocks[i] == docID)
+		{
+			callback({Error: "The document is currently locked"});
+			return;
+		}
+	}
+	gitLocks.push(docID);
+	callback();
+}
 
+function unlock(docID)
+{
+	var i = gitLocks.indexOf(docID);
+	if(i != -1)
+	{
+		gitLocks.splice(i,1);
+	}
+}
 
 exports.createRepo = createRepo
 exports.createBranch = createBranch;
 exports.deleteBranch = deleteBranch;
 exports.commit = commitToBranchAndMerge;
 exports.merge = merge;
+exports.manageLocks = manageLocks;
+exports.unlock = unlock;

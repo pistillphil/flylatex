@@ -1,7 +1,7 @@
 /*
  *  Contains (and imports) all route definitions here for the FlyLaTeX application
  */
-
+gitLocks = [];
 var mongoose = require("mongoose")
 , Schema = mongoose.Schema
 , ObjectId = Schema.ObjectId
@@ -1295,6 +1295,11 @@ exports.saveDocument = function(req, res) {
 			{
 				response.mergeConflict = true;
 			}
+			else
+			{
+				// Only unlock if no merge conflict
+				gitTools.unlock(docID);
+			}
 			res.json(response);
 			return;
 		}
@@ -1340,12 +1345,28 @@ exports.saveDocument = function(req, res) {
 				response.code = 200;
 				response.infos.push("Successfully saved the document");
 				response.refresh = true;
+				// Unlock if commit was succesfull
+				gitTools.unlock(docID);
 				res.json(response);
 			});
 		}
 	}
-
-	gitTools.commit(req, reactToCommit);
+	gitTools.manageLocks(documentId, function(err)
+	{
+		if(err)
+		{
+			console.log("Lock Error: ");
+			console.log(err);
+			response.errors.push("Document is currently locked. Please try again later.");
+			res.json(response);
+			return;
+		}
+		else
+		{
+			gitTools.commit(req, reactToCommit);
+		}
+	});
+	
 };
 
 exports.mergeConflict = function(req, res)
@@ -1484,12 +1505,12 @@ exports.resolveMergeConflict = function(req, res)
 				response.code = 200;
 				response.infos.push("Successfully resolved the merge conflict");
 				response.resolved = true;
+				// Unlock if merge was resolved succesfully
+				gitTools.unlock(docID);
 				res.json(response);
 			});
 		}
 	}
-	
-	repo = git('/home/git/repo/'+docID);
 	
 	gitTools.merge(req, reactToMerge);
 }
