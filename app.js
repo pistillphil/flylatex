@@ -116,6 +116,9 @@ app.get('/merge/:documentId', routes.mergeConflict);
 // resolve the merge conflict and save new file
 app.post('/mergedoc', routes.resolveMergeConflict);
 
+// for showing all commited changes of a specific document
+app.get('/history/:documentId', routes.getHistory);
+
 /** end of ROUTES */
 
 // open a port for this server

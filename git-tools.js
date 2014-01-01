@@ -1,5 +1,6 @@
 var fs = require("fs-extra");
 git = require("gift");
+async = require("async");
 
 function createBranch(repo, req, callback)
 {
@@ -330,6 +331,74 @@ function unlock(docID)
 	}
 }
 
+function getCommitList(docID, callback)
+{			
+	//Commit Array
+	allCommits = [];
+
+	repo = git('/home/git/repo/' + docID);
+	
+	//Get the last commits
+	repo.commits(function(err, commits) {
+		if (err) {
+			console.log(err);		
+		}
+		else {
+			//Iterate through all commits one by one
+			async.eachSeries(commits, function(commit, callba) {
+				//foreach commit, checkout
+				repo.checkout(commit.id, function(err, singlecommit){
+					if (err) {
+						console.log(err);		
+					}else{
+						console.log("repo checkout success");
+						
+						//Read the content of commit from file
+						fs.readFile("/home/git/repo/" + docID + "/contents.tex", 'utf8', function (err, content) {
+						if (err){
+							//One error will always be triggered
+							console.log("File could not be read. (should happen only once! The last time!)");
+							//Go back to master point so you can commit new documents.
+							repo.checkout("master", function(err){
+								if (err) {
+									console.log(err);		
+								}
+							});
+							callba();
+						}else{
+							console.log("Retrieved commit data.");
+							//Add commit data to allCommits
+							allCommits.push({
+								authored_date: commit.authored_date,
+								author: commit.message.substring(commit.message.lastIndexOf(":")+1),
+								content: content
+							});
+							
+							callba();
+						}
+					});
+					}
+				});
+							
+				
+			}, function (err) {
+				if (err) {
+					console.log("Commit iteration error");
+					//When error, go back to master branch
+					repo.checkout("master", function(err){
+						if (err) {
+							console.log(err);		
+						}
+					});
+				}
+				console.log("All commits iterated");
+				//Give all commits to callback function
+				callback(null, allCommits);
+			});
+		}
+	});
+}
+
 exports.createRepo = createRepo
 exports.createBranch = createBranch;
 exports.deleteBranch = deleteBranch;
@@ -337,3 +406,4 @@ exports.commit = commitToBranchAndMerge;
 exports.merge = merge;
 exports.manageLocks = manageLocks;
 exports.unlock = unlock;
+exports.getCommitList = getCommitList;
