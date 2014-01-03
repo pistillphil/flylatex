@@ -1514,3 +1514,94 @@ exports.resolveMergeConflict = function(req, res)
 	
 	gitTools.merge(req, reactToMerge);
 }
+
+/**
+ * getHistory ->
+ * fetches whole edit histroy from git
+ *
+ * @param req : request object
+ * @param res : response object
+ * 
+ * @getparam documentId : id of document to open
+ */
+exports.getHistory = function(req, res) {
+    // retrieve the document id from url
+    var documentId = req.params.documentId;
+    
+    // first retrieve the name of the document
+    Document.findOne({_id:documentId}, function(err, doc) {
+        if (err || !doc) {
+            req.flash("error", "An Error Occured while trying to open the document");
+            res.redirect('back');
+            return;
+        }
+		
+		console.log("Summoning existing document history.");
+        
+        // assemble the document lines
+        var lastModified
+        , userDoc
+        , docInSession
+        , writeable
+        , sharesWith;
+        
+        // retrieve the document from the current user session
+        docInSession = helpers.searchForDocsInSession(documentId, req.session); 
+        // handle lag in findOne callback execution
+        if (docInSession == null) {
+            return;
+        }
+        
+        sharesWith = (openDocuments[documentId] ?
+                      openDocuments[documentId] : []);
+        
+        if (openDocuments[documentId] 
+            && openDocuments[documentId].indexOf(req.session.currentUser) == -1) {
+            openDocuments[documentId].push(req.session.currentUser);
+        }
+        
+        // then record that this document is now opened by the current user
+        if (!openDocuments[documentId]) {
+            openDocuments[documentId] = [req.session.currentUser];
+        }
+		
+		//Get all commits from this documentId
+		gitTools.getCommitList(documentId, function(err, commits){
+			if(err)
+			{
+				console.log(err);
+				return;
+			}else{
+				console.log("Overall total super success! Attempting to create history page");
+				// construct a user document
+				userDoc = {
+					"id" : documentId
+					, "name" : doc.name
+					, "text" : escape(doc.data) // escape special characters
+					, "lastSaved" : doc.lastModified
+					, "sharesWith" : sharesWith
+					, "readAccess" : docInSession.readAccess
+					, "writeAccess" : docInSession.writeAccess
+					, "canShare" : docInSession.canShare
+				};
+
+				console.log(commits);
+				
+				// render the document you just opened
+				res.render("history"
+						   , { title: "Viewing the document history of '"+ doc.name + "'"
+							   , shortTitle: "Fly Latex"
+							   , tagLine: "Viewing the document history of '" + doc.name + "'"
+							   , fileSpecificStyle: "open-document.css"
+							   , fileSpecificScript: "open-document.js"
+							   , userDocument: userDoc
+							   , commits: commits
+							   , currentUser: req.session.currentUser
+							   , isLoggedIn: req.session.isLoggedIn
+							   , port : configs.port
+							   , userDocuments: req.session.userDocuments
+							 });
+			}
+		});
+    });
+};

@@ -1,0 +1,70 @@
+<div class="row">
+  <div class="span6">
+    <div class="documents-section-errors">
+      <!-- put dynamic errors onhere -->
+      
+      <!-- it should like the errors on the other pages. Be consistent. -->
+    </div>
+    <div class="back-to-documents-listing">
+      <button class="btn btn-primary" onclick="document.location.href='/';">
+	<i class="icon-backward"></i>
+	Back to Documents Listing
+      </button>
+    </div>
+    <div id="header">
+      <div id="htext">
+	Viewing&nbsp;
+	<b class="current-doc" data-doc-id="<%= userDocument.id %>" id="docname"><%= userDocument.name %></b>
+	&nbsp;history
+	<small id="last-saved-time-parent" style="display:none;" class="pull-right">
+	  Last Saved <span id="last-saved-time"></span>
+	</small>  
+      </div>
+    </div>
+	<!-- -->
+	<br><br>
+		<select id="commitSelect" class="form-control">
+			<!-- For each commit -->
+			<!-- Create option entry based on authored date, value is array positon -->
+			<%
+				for(commit in commits){
+			%>
+				<option value="<%= commit %>"><%= commits[commit].authored_date %></option>
+			<%
+				}
+			%>
+		</select>
+	
+		<%
+			for(commit in commits){
+		%>
+			<div id="<%= commit %>">
+				<b>Commit time:</b> <%= commits[commit].authored_date %><br>
+				<b>Commiter:</b>    <%= commits[commit].author %><br>
+				<b>Content:</b><br><%- commits[commit].content.replace(/\n/g, "<br />") %><br>
+			</div>
+		<%
+			}
+		%>
+		
+		
+	  <!-- version list goes here! -->
+		<div id="doc-area">
+		<!--
+			<div id="editor">
+			</div>
+		-->
+		</div>
+  </div>
+</div>
+
+<script type="text/javascript">
+   var sel = document.getElementById('commitSelect');
+   sel.onchange = function() {
+		
+		//Get id from curently selected commit date option
+		var selectedCommitID = sel.options[sel.selectedIndex].value;
+		
+		document.getElementById(selectedCommitID).scrollIntoView(false);
+	  }
+</script>
