@@ -1220,7 +1220,7 @@ exports.openDocument = function(req, res) {
         // render the document you just opened
         res.render("open-document"
                    , { title: "Viewing the document '"+ doc.name + "'"
-                       , shortTitle: "Fly Latex"
+                       , shortTitle: "LaTeX Editor"
                        , tagLine: "Viewing the document '" + doc.name + "'"
                        , fileSpecificStyle: "open-document.css"
                        , fileSpecificScript: "open-document.js"
@@ -1433,7 +1433,7 @@ exports.mergeConflict = function(req, res)
 				// render the document you just opened
 				res.render("resolve-merge-conflict"
 						   , { title: "Resolving Merge Conflict for '"+ doc.name + "'"
-							   , shortTitle: "Fly Latex"
+							   , shortTitle: "LaTeX Editor"
 							   , tagLine: "Viewing the document '" + doc.name + "'"
 							   , fileSpecificStyle: "open-document.css"
 							   , fileSpecificScript: "open-document.js"
@@ -1590,7 +1590,7 @@ exports.getHistory = function(req, res) {
 				// render the document you just opened
 				res.render("history"
 						   , { title: "Viewing the document history of '"+ doc.name + "'"
-							   , shortTitle: "Fly Latex"
+							   , shortTitle: "LaTeX Editor"
 							   , tagLine: "Viewing the document history of '" + doc.name + "'"
 							   , fileSpecificStyle: "open-document.css"
 							   , fileSpecificScript: "open-document.js"

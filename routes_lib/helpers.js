@@ -82,7 +82,7 @@ var loadUser = function(user) {
  */
 var displayErrorsForSignUp = function(res, errors) {
     res.render("sign-up",
-               {title: "Sign Up for Fly Latex"
+               {title: "Sign Up for LaTeX Editor"
                 , shortTitle: "Sign Up"
                 , tagLine: "Start Editing Documents with Your Peeps!"
                 , fileSpecificStyle: "sign-up.css"

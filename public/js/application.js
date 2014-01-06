@@ -887,8 +887,11 @@ var updateAlerts = function(response) {
 					window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
 				}
 			});
-			documentIDIndex = window.location.href.lastIndexOf("/");
-			window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
+			$("html").click(function()
+			{
+				documentIDIndex = window.location.href.lastIndexOf("/");
+				window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
+			});
 		}
         clearAjaxAlertBlocks();
         updateAjaxErrors(response.errors);
