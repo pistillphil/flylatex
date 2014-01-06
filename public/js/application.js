@@ -895,8 +895,14 @@ var updateAlerts = function(response) {
 		}
         clearAjaxAlertBlocks();
         updateAjaxErrors(response.errors);
+		if(!$('.save-document-link').is(':visible'))
+		{
+			$('.save-document-link').show()
+		}
         return;
-    } else if (response.infos.length > 0) {
+    } 
+	else if (response.infos.length > 0) 
+	{
         clearAjaxAlertBlocks();
         updateAjaxInfos(response.infos);
     }
