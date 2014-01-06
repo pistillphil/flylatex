@@ -23,7 +23,7 @@ exports.index = function(req, res, err){
         // display the documents for user
         res.render("display-docs",
                    {title: "Fly Latex: Start Editing Documents"
-                    , shortTitle: "Fly Latex"
+                    , shortTitle: "LaTeX Editor"
                     , tagLine: "Start Editing Documents with Your Peeps!"
                     , fileSpecificScript: "application.js"
                     , currentUser: req.session.currentUser

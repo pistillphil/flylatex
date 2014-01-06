@@ -577,8 +577,8 @@ function DocsManager() {
 	
 		this.resolveConflict = function(docId, docname)
 	{
-		// TODO: Write warning message
-		bootbox.confirm("WARNING: !", function()
+		// Display warning message
+		bootbox.confirm("WARNING: The new document will have the exact contents of what you see here!", function()
 		{
 		// save the document in it's current form
 			$.ajax({type: "POST"
@@ -887,6 +887,8 @@ var updateAlerts = function(response) {
 					window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
 				}
 			});
+			documentIDIndex = window.location.href.lastIndexOf("/");
+			window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
 		}
         clearAjaxAlertBlocks();
         updateAjaxErrors(response.errors);
