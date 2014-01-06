@@ -578,18 +578,20 @@ function DocsManager() {
 		this.resolveConflict = function(docId, docname)
 	{
 		// Display warning message
-		bootbox.confirm("WARNING: The new document will have the exact contents of what you see here!", function()
+		bootbox.confirm("WARNING: The new document will have the exact contents of what you see here!", function(result)
 		{
-		// save the document in it's current form
-			$.ajax({type: "POST"
-				, data: {"documentId" : docId, "documentText":editor.getValue()}
-				, url: "/mergedoc"
-				, success: function(response) {
-					// update alerts
-					updateAlerts(response);
-				}
-			});
-		
+			if(result === true)
+			{
+				// save the document in it's current form
+				$.ajax({type: "POST"
+					, data: {"documentId" : docId, "documentText":editor.getValue()}
+					, url: "/mergedoc"
+					, success: function(response) {
+						// update alerts
+						updateAlerts(response);
+					}
+				});
+			}
 		});
 	};
 }
