@@ -249,7 +249,12 @@ function commitToBranchAndMerge(request, callback)
 								}
 								else
 								{
+									// No commit is necessary
 									console.log("No commit necessary");
+									fs.readFile('/home/git/repo/'+docID+'/contents.tex', 'utf8', function(err, data)
+										{
+											callback(null, data); 
+										});
 								}
 							});
 						}
