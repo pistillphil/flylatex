@@ -6,6 +6,10 @@
       <!-- it should like the errors on the other pages. Be consistent. -->
     </div>
     <div class="back-to-documents-listing">
+      <button class="btn btn-primary" onclick="document.location.href='/document/<%= userDocument.id %>';">
+	<i class="icon-backward"></i>
+	Back to Document
+      </button>
       <button class="btn btn-primary" onclick="document.location.href='/';">
 	<i class="icon-backward"></i>
 	Back to Documents Listing
@@ -41,8 +45,13 @@
 			<div id="<%= commit %>">
 				<b>Commit time:</b> <%= commits[commit].authored_date %><br>
 				<b>Commiter:</b>    <%= commits[commit].author %><br>
+				      <button class="btn btn-primary btn-mini" onclick="document.location.href='/commitchanges/<%= userDocument.id %>/<%= commit %>';">
+					<i class="icon-search"></i>
+					View Changes
+				      </button><br>
 				<b>Content:</b><br><%- commits[commit].content.replace(/\n/g, "<br />") %><br>
 			</div>
+			<hr style="background:#000000; border:0; height:1px" />
 		<%
 			}
 		%>
@@ -65,6 +74,6 @@
 		//Get id from curently selected commit date option
 		var selectedCommitID = sel.options[sel.selectedIndex].value;
 		
-		document.getElementById(selectedCommitID).scrollIntoView(false);
+		document.getElementById(selectedCommitID).scrollIntoView(true);
 	  }
 </script>

@@ -22,8 +22,8 @@ exports.index = function(req, res, err){
     if (req.session.currentUser && req.session.isLoggedIn) {
         // display the documents for user
         res.render("display-docs",
-                   {title: "Fly Latex: Start Editing Documents"
-                    , shortTitle: "Fly Latex"
+                   {title: "LaTeX Editor: Start Editing Documents"
+                    , shortTitle: "LaTeX Editor"
                     , tagLine: "Start Editing Documents with Your Peeps!"
                     , fileSpecificScript: "application.js"
                     , currentUser: req.session.currentUser
@@ -35,9 +35,9 @@ exports.index = function(req, res, err){
     } else {
         // user didn't try to log in 
         res.render("not-logged-in",
-                   {title: "Log Into/Sign Into to FLY LATEX!"
-                    , shortTitle: "FLY LATEX"
-                    , tagLine: "Real Time Collaborative editor in node-js"
+                   {title: "Log Into/Sign Into to LaTeX Editor!"
+                    , shortTitle: "LaTeX Editor"
+                    , tagLine: "Collaborative editor in node-js"
                     , fileSpecificStyle: "not-logged-in.css"
                     , port : configs.port});
     }

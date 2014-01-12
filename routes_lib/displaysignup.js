@@ -7,7 +7,7 @@
  */
 exports.displaySignUpForm = function(req, res) {
     res.render("sign-up",
-               {title: "Sign Up for Fly Latex"
+               {title: "Sign Up for LaTeX Editor"
                 , shortTitle: "Sign Up"
                 , tagLine: "Start Editing Documents with Your Peeps!"
                 , fileSpecificStyle: "sign-up.css"

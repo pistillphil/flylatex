@@ -119,6 +119,10 @@ app.post('/mergedoc', routes.resolveMergeConflict);
 // for showing all commited changes of a specific document
 app.get('/history/:documentId', routes.getHistory);
 
+// showing difference between two commits (oldCommitNumber being the older one)
+app.get('/commitchanges/:documentId/:oldCommitNumber', routes.showCommitChanges);
+
+
 /** end of ROUTES */
 
 // open a port for this server

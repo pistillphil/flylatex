@@ -577,19 +577,21 @@ function DocsManager() {
 	
 		this.resolveConflict = function(docId, docname)
 	{
-		// TODO: Write warning message
-		bootbox.confirm("WARNING: !", function()
+		// Display warning message
+		bootbox.confirm("WARNING: The new document will have the exact contents of what you see here!", function(result)
 		{
-		// save the document in it's current form
-			$.ajax({type: "POST"
-				, data: {"documentId" : docId, "documentText":editor.getValue()}
-				, url: "/mergedoc"
-				, success: function(response) {
-					// update alerts
-					updateAlerts(response);
-				}
-			});
-		
+			if(result === true)
+			{
+				// save the document in it's current form
+				$.ajax({type: "POST"
+					, data: {"documentId" : docId, "documentText":editor.getValue()}
+					, url: "/mergedoc"
+					, success: function(response) {
+						// update alerts
+						updateAlerts(response);
+					}
+				});
+			}
 		});
 	};
 }
@@ -887,11 +889,22 @@ var updateAlerts = function(response) {
 					window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
 				}
 			});
+			$("html").click(function()
+			{
+				documentIDIndex = window.location.href.lastIndexOf("/");
+				window.location.href = "../merge" + window.location.href.substring(documentIDIndex);
+			});
 		}
         clearAjaxAlertBlocks();
         updateAjaxErrors(response.errors);
+		if(!$('.save-document-link').is(':visible'))
+		{
+			$('.save-document-link').show()
+		}
         return;
-    } else if (response.infos.length > 0) {
+    } 
+	else if (response.infos.length > 0) 
+	{
         clearAjaxAlertBlocks();
         updateAjaxInfos(response.infos);
     }

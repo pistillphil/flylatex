@@ -1220,7 +1220,7 @@ exports.openDocument = function(req, res) {
         // render the document you just opened
         res.render("open-document"
                    , { title: "Viewing the document '"+ doc.name + "'"
-                       , shortTitle: "Fly Latex"
+                       , shortTitle: "LaTeX Editor"
                        , tagLine: "Viewing the document '" + doc.name + "'"
                        , fileSpecificStyle: "open-document.css"
                        , fileSpecificScript: "open-document.js"
@@ -1433,7 +1433,7 @@ exports.mergeConflict = function(req, res)
 				// render the document you just opened
 				res.render("resolve-merge-conflict"
 						   , { title: "Resolving Merge Conflict for '"+ doc.name + "'"
-							   , shortTitle: "Fly Latex"
+							   , shortTitle: "LaTeX Editor"
 							   , tagLine: "Viewing the document '" + doc.name + "'"
 							   , fileSpecificStyle: "open-document.css"
 							   , fileSpecificScript: "open-document.js"
@@ -1517,7 +1517,7 @@ exports.resolveMergeConflict = function(req, res)
 
 /**
  * getHistory ->
- * fetches whole edit histroy from git
+ * fetches whole commit history from git
  *
  * @param req : request object
  * @param res : response object
@@ -1572,7 +1572,99 @@ exports.getHistory = function(req, res) {
 				console.log(err);
 				return;
 			}else{
-				console.log("Overall total super success! Attempting to create history page");
+				console.log("Overall success! Attempting to create history page");
+				// construct a user document
+				userDoc = {
+					"id" : documentId
+					, "name" : doc.name
+					, "text" : escape(doc.data) // escape special characters
+					, "lastSaved" : doc.lastModified
+					, "sharesWith" : sharesWith
+					, "readAccess" : docInSession.readAccess
+					, "writeAccess" : docInSession.writeAccess
+					, "canShare" : docInSession.canShare
+				};
+				
+				// render the document you just opened
+				res.render("history"
+						   , { title: "Viewing the document history of '"+ doc.name + "'"
+							   , shortTitle: "LaTeX Editor"
+							   , tagLine: "Viewing the document history of '" + doc.name + "'"
+							   , fileSpecificStyle: "open-document.css"
+							   , fileSpecificScript: "open-document.js"
+							   , userDocument: userDoc
+							   , commits: commits
+							   , currentUser: req.session.currentUser
+							   , isLoggedIn: req.session.isLoggedIn
+							   , port : configs.port
+							   , userDocuments: req.session.userDocuments
+							 });
+							 
+				console.log("History view rendered.");
+			}
+		});
+    });
+};
+
+/**
+ * showCommitChanges ->
+ * shows changes inbetween two commits from git
+ *
+ * @param req : request object
+ * @param res : response object
+ * 
+ * @getparam documentId : id of document to open
+ * @getparam oldCommitNumber : number of the older commit
+ */
+exports.showCommitChanges = function(req, res) {
+    // retrieve the document id from url
+    var documentId = req.params.documentId;
+	var oldCommitNumber = req.params.oldCommitNumber;
+    
+    // first retrieve the name of the document
+    Document.findOne({_id:documentId}, function(err, doc) {
+		if (err || !doc) {
+		    req.flash("error", "An Error Occured while trying to open the document");
+		    res.redirect('back');
+		    return;
+		}
+		
+		// assemble the document lines
+		var lastModified
+		, userDoc
+		, docInSession
+		, writeable
+		, sharesWith;
+		
+		// retrieve the document from the current user session
+		docInSession = helpers.searchForDocsInSession(documentId, req.session); 
+		// handle lag in findOne callback execution
+		if (docInSession == null) {
+		    return;
+		}
+		
+		sharesWith = (openDocuments[documentId] ?
+		              openDocuments[documentId] : []);
+		
+		if (openDocuments[documentId] 
+		    && openDocuments[documentId].indexOf(req.session.currentUser) == -1) {
+		    openDocuments[documentId].push(req.session.currentUser);
+		}
+		
+		// then record that this document is now opened by the current user
+		if (!openDocuments[documentId]) {
+		    openDocuments[documentId] = [req.session.currentUser];
+		}
+		
+		console.log(documentId + "  " + oldCommitNumber);
+	
+		//Get difference between the commit (at the index of oldCommitNumber) and next commit
+		gitTools.getGitCommitDifference(documentId, oldCommitNumber, function(err, diff){
+			if(err){
+				console.log(err);
+				return;
+			}else{
+				console.log(diff);
 				// construct a user document
 				userDoc = {
 					"id" : documentId
@@ -1585,23 +1677,22 @@ exports.getHistory = function(req, res) {
 					, "canShare" : docInSession.canShare
 				};
 
-				console.log(commits);
-				
-				// render the document you just opened
-				res.render("history"
-						   , { title: "Viewing the document history of '"+ doc.name + "'"
-							   , shortTitle: "Fly Latex"
-							   , tagLine: "Viewing the document history of '" + doc.name + "'"
+				// render the document commitchanges you just opened
+				res.render("commitchanges"
+						   , { title: "Viewing the document changes of '"+ doc.name + "'"
+							   , shortTitle: "LaTeX Editor"
+							   , tagLine: "Viewing the document changes of '" + doc.name + "'"
 							   , fileSpecificStyle: "open-document.css"
 							   , fileSpecificScript: "open-document.js"
-							   , userDocument: userDoc
-							   , commits: commits
+							   , userDocument: userDoc 
+							   , diff: diff
 							   , currentUser: req.session.currentUser
 							   , isLoggedIn: req.session.isLoggedIn
 							   , port : configs.port
 							   , userDocuments: req.session.userDocuments
 							 });
-			}
+				
+			}//else
 		});
     });
 };
