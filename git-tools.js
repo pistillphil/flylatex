@@ -404,6 +404,32 @@ function getCommitList(docID, callback)
 	});
 }
 
+function getGitCommitDifference(docID, commitID, callback)
+{
+	repo = git('/home/git/repo/' + docID);
+	
+	//This fixed an issue I couldn't solve and understand. But is has something to do with repo.commits() and repo.diff()
+	commitID++;
+	
+	//Get the last x commits and compare them (x being commitID)
+	repo.commits("master", commitID + 1, function(err, commits) {
+		if (err || (commitID == 0)) {
+			callback(null, "No changes submitted to master.");	
+		}else{		
+			//Compare commits shows unchanged text and change text with + 
+			//First file in the array is the newest file			
+			repo.diff(commits[commitID], commits[commitID - 1], function (err, diffs) {
+				if(err)
+					console.log(err);
+				
+				//Give the difference between commits to the callback function
+				callback(null, diffs[0].diff);
+
+			});
+		}
+	});
+}
+
 exports.createRepo = createRepo
 exports.createBranch = createBranch;
 exports.deleteBranch = deleteBranch;
@@ -412,3 +438,4 @@ exports.merge = merge;
 exports.manageLocks = manageLocks;
 exports.unlock = unlock;
 exports.getCommitList = getCommitList;
+exports.getGitCommitDifference = getGitCommitDifference;
