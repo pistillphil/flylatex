@@ -105,40 +105,52 @@ function initialCommit(repo, request, callback)
 	{
 		if(err)
 		{
-			callback({error: err, func: "fswriteFile()"}, null);
+			callback({error: err, func: "fswriteFile(dummy)"}, null);
 			return;
 		}
 		else
 		{
-			// Add file to repository
-			repo.add('/home/git/repo/'+docID+'/dummy', function(err, addedFile)
+			// git ignores every file, but "dummy" and "contents.tex"
+			fs.writeFile('/home/git/repo/'+docID+'/.gitignore', "*\n!dummy\n!contents.tex", function()
 			{
 				if(err)
 				{
-					callback({error: err, func: "repo.add()"}, null);
+					callback({error: err, func: "fswriteFile(.gitignore)"}, null);
 					return;
 				}
-				// Check Status and make the commit
 				else
 				{
-					repo.status(function(err, status)
+					// Add file to repository
+					repo.add('/home/git/repo/'+docID+'/dummy', function(err, addedFile)
 					{
-						if(!status.clean)
+						if(err)
 						{
-							// Commit
-							repo.commit("dummy", function(err)	//The message must not containt any spaces
+							callback({error: err, func: "repo.add()"}, null);
+							return;
+						}
+						// Check Status and make the commit
+						else
+						{
+							repo.status(function(err, status)
 							{
-								if(err)
+								if(!status.clean)
 								{
-									callback({error: err, func: "repo.commit()"}, null);
-									return;
+									// Commit
+									repo.commit("dummy", function(err)	//The message must not containt any spaces
+									{
+										if(err)
+										{
+											callback({error: err, func: "repo.commit()"}, null);
+											return;
+										}
+										callback();
+									});
 								}
-								callback();
 							});
 						}
 					});
 				}
-			});
+			})
 		}
 	});
 }
