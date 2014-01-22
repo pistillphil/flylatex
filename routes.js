@@ -1092,15 +1092,12 @@ exports.compileDoc = function(req, res) {
                     return;
                 }
                 process.chdir(dirPath);
-                
-                var copyPackages = ["cp -R"
-                                   , configs.includes.path
-                                   , dirPath + "/"].join(" ");
 
-                exec(copyPackages, function(err) {
-                    if (err) {
-                        response.errors.push("Error copying additional "
-                                             + "packages/images to use during compilation");
+				fs.copy("/home/git/repo/"+documentId, dirPath, function(err) 
+				{
+                    if (err) 
+					{
+                        response.errors.push("Error copying images for compilation");
                         res.json(response);
                         return;
                     }
