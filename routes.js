@@ -1696,3 +1696,96 @@ exports.showCommitChanges = function(req, res) {
 		});
     });
 };
+
+exports.images = function(req, res)
+{
+	var documentId = req.params.documentId;
+	
+	Document.findOne({_id:documentId}, function(err, doc) {
+		if (err || !doc) {
+			req.flash("error", "An Error Occured while trying to open the document");
+			res.redirect('back');
+			return;
+		}
+		
+		// assemble the document lines
+		var lastModified
+		, userDoc
+		, docInSession
+		, writeable
+		, sharesWith;
+		
+		// retrieve the document from the current user session
+		docInSession = helpers.searchForDocsInSession(documentId, req.session); 
+		// handle lag in findOne callback execution
+		if (docInSession == null) {
+			return;
+		}
+		
+		sharesWith = (openDocuments[documentId] ?
+					  openDocuments[documentId] : []);
+		
+		if (openDocuments[documentId] 
+			&& openDocuments[documentId].indexOf(req.session.currentUser) == -1) {
+			openDocuments[documentId].push(req.session.currentUser);
+		}
+		
+		// then record that this document is now opened by the current user
+		if (!openDocuments[documentId]) {
+			openDocuments[documentId] = [req.session.currentUser];
+		}
+		
+		// Get the list of files in the directory
+		fs.readdir('/home/git/repo/'+documentId+'/', function(err, files)
+		{
+			if(err)
+			{
+				console.log(err);
+			}
+			else
+			{
+				res.render("view-images",
+							{
+								title: "Viewing Images",
+								shortTitle: "LaTeX Editor",
+								tagLine: "Viewing Images",
+								images: files,
+								userDocument: {id: documentId, name: doc.name},
+								port : configs.port,
+								currentUser: req.session.currentUser,
+								isLoggedIn: req.session.isLoggedIn
+							});
+			}
+
+		});
+	});;
+};
+
+exports.imageUpload = function(req, res)
+{
+
+	var documentId = req.params.documentId;
+	var filepath = req.files.myfile.path;
+	var filename = req.files.myfile.name;
+	fs.readFile(filepath, function (err, data) 
+	{
+		if(err)
+		{
+			console.log("File could not be read");
+		}
+		else
+		{
+			fs.writeFile("/home/git/repo/"+documentId+"/"+filename, data, function(err)
+			{
+				if(err)
+				{
+					console.log("File could not be written");
+				}
+				else
+				{
+				res.send("Success!");
+				}
+			});
+		}
+	});
+};

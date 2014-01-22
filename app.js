@@ -122,6 +122,12 @@ app.get('/history/:documentId', routes.getHistory);
 // showing difference between two commits (oldCommitNumber being the older one)
 app.get('/commitchanges/:documentId/:oldCommitNumber', routes.showCommitChanges);
 
+// for viewing and managing images
+app.get('/images/:documentId', routes.images);
+
+// for uploading images
+app.post('/image-upload/:documentId', routes.imageUpload);
+
 
 /** end of ROUTES */
 
