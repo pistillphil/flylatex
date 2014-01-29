@@ -222,8 +222,7 @@ function commitToBranchAndMerge(request, callback)
 												{
 													repo.merge(userID, function(err)
 													{
-														// TODO: Implement View to resolve Mergeconflicts
-														// TODO: mergeConflict should only be true if there really is a merge Conflict
+														// FIXME: mergeConflict should only be true if there really is a merge Conflict
 														if(err)
 														{
 															callback({error: err, func: "merge()", mergeConflict: true}, null);

@@ -19,7 +19,7 @@
       <div id="htext">
 	Viewing&nbsp;
 	<b class="current-doc" data-doc-id="<%= userDocument.id %>" id="docname"><%= userDocument.name %></b>
-	&nbsp;history
+	&nbsp;Images
 	<small id="last-saved-time-parent" style="display:none;" class="pull-right">
 	  Last Saved <span id="last-saved-time"></span>
 	</small>  
@@ -31,7 +31,7 @@
 		
 	<ul>
 	<% for(var i = 0; i < images.length; i++) { %>
-		<% if(images[i] != "contents.tex" && images[i] != "dummy" && images[i] != ".git") { %>
+		<% if(images[i] != "contents.tex" && images[i] != "dummy" && images[i] != ".git" && images[i] != ".gitignore") { %>
 			<li>
 				<%= images[i] %>
 			</li>
