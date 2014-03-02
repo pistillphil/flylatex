@@ -7,7 +7,6 @@
 
 var express = require('express')
 , app = module.exports = express.createServer()
-, sharejs = require('share').server
 , routes = require('./routes') 
 , MongoStore = require('connect-mongo')(express)
 , configs = require('./configs');
@@ -45,13 +44,6 @@ app.configure('development', function(){
 app.configure('production', function(){
     app.use(express.errorHandler());
 });
-
-
-// ========= ShareJS configuration ============
-// attach the sharejs REST and socket.io interfaces to the server
-var sharejsOptions = {db: {type: 'none'}};
-
-sharejs.attach(app, sharejsOptions);
 
 
 /**
