@@ -1,4 +1,4 @@
-FlyLatex
+LaTeX-Editor
 ========
 
 About this Fork
