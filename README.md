@@ -5,15 +5,16 @@ About this Fork
 ----------------
 
 This [fork](https://github.com/pistillphil/flylatex) aims to change a few aspects of the [original](https://github.com/alabid/flylatex) application:
-* The editor's real time capability will be removed.
-* A version control system based on git will be implemented.
-* Users will be able to check a file's history/restore documents.
-
-Information about the setup will be updated once this project is finished.
+* The editor's real time capability was removed.
+* A version control system based on git has been implemented.
+* Users are able to check a file's history/restore documents.
 
 Fork Status
 --------------
-This Application is currently **NOT** finished/working
+This Application is currently experimental.  
+It should work as expected most of the time, but errors may occur.
+
+**Use at your own risk.**
 
 About FlyLatex
 ---------------
@@ -37,91 +38,38 @@ FlyLatex gives you:
 
 * An Open Source product that's easy to Customize
 
-* Option to use images, additional packages (like .sty files) by specifying `configs.includes.path`
+* Option to use images and additional LaTeX packages
 
-It's a free and open-source version of [ShareLatex](http://sharelatex.com).
-Woot!
-
-Screen Shots of the Internals of the FlyLatex application
----------------------------------------------------------
-
-Check it out [here](http://alabidan.me/2012/07/31/flylatex-a-real-time-collaborative-environment-some-screen-shots-of-the-app/)
 
 Setup
 -----
 
-To use FlyLatex, you must have `node`, `npm`, `mongodb` installed. So if you haven't already installed all these, do so before moving on.
+The included `install.sh` script can be used for automatic setup.
 
-Also, if you want to store and render pdf's and not just edit your LaTeX
-files, you must
-have the program `pdflatex` command line tool installed. If not, install
-it. FlyLatex stores compiled pdfs in the directory 
-`config.directory.path` specified in `configs.js`.
+Run the script as superuser. Input data about the git user the server will use (can be pretty much anything) and select the type of LaTeX packages you want to install.
 
-To install FlyLatex, first clone the repository: `git clone https://github.com/alabid/flylatex.git`
+*This script will automatically start the Server.*
 
-`cd` into the directory `flylatex`. Open the file `configs.js` with your favorite
-editor and edit the file to reflect your storage setup and your database
-setup. Use `configs.pdfs.path` to specify where you want to store
-your output pdfs in. Use `configs.includes.path` to specify what directory your TeX includes/packages/images are stored, for use during compilation of any LaTeX document.
-
-    var config = {
-        port: 3001
-        , pdfs: {
-          // absolute path of where to store compiled pdfs
-          // defaults to "pdfs" directory in "flylatex" repo
-          path: ""
-        }
-        , db : {
-          // for example: mongodb://localhost/flydb3"
-          url : "mongodb://localhost/flydb"
-        }, docs: {
-          // maximum number of documents per user
-          MAX_NUM_PER_USER : 20
-        }, includes: {
-          // specify directory (absolute path) containing latex includes
-          // defaults to "texpackages" directory in "flylatex" repo
-          path: ""
-        }  
-    };
-
-Then run the command `npm install -d` to install all the dependencies for the
-FlyLatex nodejs app. This should take only a few minutes.
-
-For more information on how to setup FlyLatex on Ubuntu, see
-[this](http://kaanaksit.wordpress.com/2013/05/10/en-how-to-use-and-install-flylatex-on-ubuntu/)
-
-Usage
+Start Server Manually
 -----
 
-You'd have to first start the `mongo` daemon using the command
+You'd have to first start the `mongo` (database) daemon using the command
 
-      mongod --dbpath <some mongodb path>
+      mongod --dbpath <dbpath> --fork --logpath <pathtologfile>
 
-`<some mongodb path>` could be `~/mongodb` or any other place you have a mongodb
+`<dbpath>` could be `~/mongodb` or any other place you have a mongodb
 path.
 
-Then `cd` into the directory (if you aren't already there) and run the command
- `foreman start`. This should invoke the `Procfile` in that directory (if you have the foreman gem installed) and start 
-the server via:
+The server itself can be started with
 
-    web: node app.js
+    node app.js &
 
 You should see a command-line message telling you the port number on which the app lives. For example, I saw the message
 
     20:38:10 web.1     | Express server listening on port 5000 in development mode
 
-So I had to visit `http://localhost:5000`. Yours might be different. Watch out.
+So I had to visit `http://<serveraddress>:5000`. Yours might be different. Watch out.
     
-If you don't have the foreman gem installed, start the app via `node app.js`.
-
-
-Feedback, Bugs, Suggestions
----------------------------
-
-I'd really like your feedback, comments, and bug reports sent to me
-somehow preferably by filing an issue (github feature).
-
 
 Original Author
 ------
@@ -137,12 +85,13 @@ Original Version
 
 Fork Version
 -------
-0.X (Unfinished)
+0.1 (Experimental)
 
 MIT Open Source License
 -----------------------
 
-Copyright &copy; 2012 Daniel Alabi
+Copyright &copy; 2012 Daniel Alabi  
+Copyright &copy; 2013 - 2014 pistillphil, lacksfish
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
